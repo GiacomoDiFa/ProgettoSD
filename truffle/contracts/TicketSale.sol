@@ -138,7 +138,7 @@ contract TicketSale {
     }
 
 
-    function getBalance() public view onlyOwner returns (uint256) {
+    function getBalance() external view onlyOwner returns (uint256) {
         return address(this).balance;
     }
 
@@ -230,7 +230,7 @@ contract TicketSale {
         return currentEvent.ticketsSold >= currentEvent.totalTickets;
     }
 
-    function getTotalEvents() public view returns (uint256){
+    function getTotalEvents() external view returns (uint256){
         return totalEvents;
     }
 }

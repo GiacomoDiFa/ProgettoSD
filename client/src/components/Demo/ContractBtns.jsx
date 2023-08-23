@@ -10,8 +10,16 @@ function ContractBtns({ setValue }) {
   const [loading, setLoading] = useState(true)
   const [events, setEvents] = useState([])
   const [selectedEvent, setSelectedEvent] = useState(null)
-  const [indexEvent, setIndexEvent] = useState(0)
+  const [indexEvent, setIndexEvent] = useState(null)
   const [ticketNumber, setTicketNumber] = useState('')
+  const [eventToRefund, setEventToRefund] = useState(null)
+  const [ticketNumberToRefund, setTicketNumberToRefund] = useState('')
+  const [indexEventToRefund, setIndexEventToRefund] = useState()
+  const [remainingTicket, setReaminingTicket] = useState('')
+  const [isSoldOut, setIsSoldOut] = useState(true)
+  const [myTicketCount, setMyTicketCount] = useState('')
+  const [indexMyEventCount, setIndexMyEventCount] = useState()
+  const [eventMyCount, setEventMyCount] = useState(null)
 
   useEffect(() => {
     async function fetchData() {
@@ -69,9 +77,55 @@ function ContractBtns({ setValue }) {
     }
   }
 
+  const getMyTicketForEvent = async (eventindex) => {
+    try {
+      const result = await contract.methods
+        .getMyTicketCount(eventindex)
+        .call({ from: accounts[0] })
+      setMyTicketCount(result)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const getRemainingTicketsForEvent = async (eventindex) => {
+    try {
+      const result = await contract.methods
+        .getRemainingTickets(eventindex)
+        .call({ from: accounts[0] })
+      setReaminingTicket(result)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const getEventSoldOut = async (eventindex) => {
+    try {
+      const result = await contract.methods
+        .isEventSoldOut(eventindex)
+        .call({ from: accounts[0] })
+      setIsSoldOut(result)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   const handleEventSelect = (eventIndex) => {
     setSelectedEvent(events[eventIndex])
     setIndexEvent(eventIndex)
+    getRemainingTicketsForEvent(eventIndex)
+    getEventSoldOut(eventIndex)
+  }
+
+  const handleEventToRefundSelect = (eventIndex) => {
+    setEventToRefund(events[eventIndex])
+    setIndexEventToRefund(eventIndex)
+  }
+
+  const handleEventMyTicket = (eventIndex) => {
+    setEventMyCount(events[eventIndex])
+    setIndexMyEventCount(eventIndex)
+    getMyTicketForEvent(eventIndex)
   }
 
   const buyTicketsHandler = async () => {
@@ -85,9 +139,29 @@ function ContractBtns({ setValue }) {
       const numberOfTicket = parseInt(ticketNumber)
       await contract.methods.buyTickets(indexEvent, numberOfTicket).send({
         from: accounts[0],
-        gas: '500000',
+        gas: '5000000',
         value: Web3.utils.toWei(ticketNumber, 'ether'),
       })
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const refundTicketHandler = async () => {
+    if (ticketNumberToRefund === '') {
+      alert('Please enter all fields correctly')
+    }
+    if (!isPositiveInteger(ticketNumberToRefund)) {
+      alert('Please insert a positive number')
+    }
+    try {
+      const numberOfTicketToRefund = parseInt(ticketNumberToRefund)
+      await contract.methods
+        .refundTickets(indexEventToRefund, numberOfTicketToRefund)
+        .send({
+          from: accounts[0],
+          value: Web3.utils.toWei('0', 'ether'),
+        })
     } catch (error) {
       console.log(error)
     }
@@ -99,8 +173,25 @@ function ContractBtns({ setValue }) {
         <p>Caricamento...</p>
       ) : (
         <div>
-          <h1>Buy Tickets</h1>
           <form>
+            <h1>My Tickets For Event</h1>
+            <select onChange={(e) => handleEventMyTicket(e.target.value)}>
+              <option value="">Select an event</option>
+              {events.map((event, index) => (
+                <option key={index} value={index}>
+                  {event.name}
+                </option>
+              ))}
+            </select>
+            <div>
+              {eventMyCount && (
+                <p>I have {myTicketCount} ticket/s for the current event</p>
+              )}
+            </div>
+          </form>
+          <hr />
+          <form>
+            <h1>Buy Tickets</h1>
             <select onChange={(e) => handleEventSelect(e.target.value)}>
               <option value="">Select an event</option>
               {events.map((event, index) => (
@@ -117,7 +208,9 @@ function ContractBtns({ setValue }) {
                 setTicketNumber(e.target.value)
               }}
             ></input>
-            <button onClick={buyTicketsHandler}>Buy Tickets</button>
+            {!isSoldOut && (
+              <button onClick={buyTicketsHandler}>Buy Tickets</button>
+            )}
           </form>
           {selectedEvent && (
             <div>
@@ -126,13 +219,38 @@ function ContractBtns({ setValue }) {
               <p>Description: {selectedEvent.description}</p>
               <p>Total Tickets: {selectedEvent.totalTickets}</p>
               <p>Tickets Sold: {selectedEvent.ticketsSold}</p>
-              <p>Ticket Price: {selectedEvent.ticketPrice}$</p>
+              <p>Ticket Price: {selectedEvent.ticketPrice} ETH</p>
+              <p>Remaining Tickets: {remainingTicket}</p>
+              {isSoldOut && (
+                <p style={{ color: 'red' }}>EVENT IS SOLD OUT!!!!</p>
+              )}
               {/* Aggiungi altri dettagli dell'evento qui */}
             </div>
           )}
+          <hr />
+          <form>
+            <h1>Refund Tickets</h1>
+            <select onChange={(e) => handleEventToRefundSelect(e.target.value)}>
+              <option value="">Select an event</option>
+              {events.map((event, index) => (
+                <option key={index} value={index}>
+                  {event.name}
+                </option>
+              ))}
+            </select>
+            <input
+              type="text"
+              placeholder="Insert number of tickets"
+              value={ticketNumberToRefund}
+              onChange={(e) => {
+                setTicketNumberToRefund(e.target.value)
+              }}
+            ></input>
+            <button onClick={refundTicketHandler}>Refund Tickets</button>
+          </form>
+          <hr />
         </div>
       )}
-      <hr />
     </>
   )
 }

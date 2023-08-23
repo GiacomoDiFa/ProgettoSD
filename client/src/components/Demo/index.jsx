@@ -10,19 +10,17 @@ import NoticeWrongNetwork from './NoticeWrongNetwork'
 
 function Demo() {
   const { state } = useEth()
-  const [value, setValue] = useState('?')
 
   const demo = (
     <>
       <div className="contract-container">
-        <ContractBtns setValue={setValue} />
+        <ContractBtns />
       </div>
     </>
   )
 
   return (
     <div className="demo">
-      <Title />
       {!state.artifact ? (
         <NoticeNoArtifact />
       ) : !state.contract ? (

@@ -233,4 +233,9 @@ contract TicketSale {
     function getTotalEvents() external view returns (uint256){
         return totalEvents;
     }
+
+    function getTicketsToResellForAddressAndEvent(address _address, uint256 eventId) external view returns (uint256) {
+    return ticketsToResell[_address][eventId];
+}
+
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import useEth from '../../contexts/EthContext/useEth'
 import Web3 from 'web3'
 
@@ -20,9 +20,30 @@ function ContractBtns({ setValue }) {
   const [myTicketCount, setMyTicketCount] = useState('')
   const [indexMyEventCount, setIndexMyEventCount] = useState()
   const [eventMyCount, setEventMyCount] = useState(null)
+  const [ticketNumberWantToResell, setTicketNumberWantToResell] = useState('')
+  const [eventWantToResell, setEventWantToResell] = useState()
+  const [indexEventWantToResell, setIndexEventWantToResell] = useState()
+  const [resellers, setResellers] = useState([])
 
   useEffect(() => {
-    async function fetchData() {
+    const fetchData = async () => {
+      console.log(resellers)
+      try {
+        const eventWantToResell = await contract.events
+          .WantToResell()
+          .on('data', (event) => {
+            console.log('Event to resell event recevide:')
+            const reseller = event.returnValues['reseller']
+            console.log(reseller)
+            setResellers((prevResellers) => [...prevResellers, reseller])
+            console.log(resellers)
+          })
+          .on('error', (error) => {
+            console.log('error:', error)
+          })
+      } catch (error) {
+        console.log(error)
+      }
       try {
         const totalEvents = await contract.methods
           .getTotalEvents()
@@ -122,6 +143,11 @@ function ContractBtns({ setValue }) {
     setIndexEventToRefund(eventIndex)
   }
 
+  const handleWantToResellEventSelect = (eventIndex) => {
+    setEventWantToResell(events[eventIndex])
+    setIndexEventWantToResell(eventIndex)
+  }
+
   const handleEventMyTicket = (eventIndex) => {
     setEventMyCount(events[eventIndex])
     setIndexMyEventCount(eventIndex)
@@ -140,7 +166,10 @@ function ContractBtns({ setValue }) {
       await contract.methods.buyTickets(indexEvent, numberOfTicket).send({
         from: accounts[0],
         gas: '5000000',
-        value: Web3.utils.toWei(ticketNumber, 'ether'),
+        value: Web3.utils.toWei(
+          ticketNumber,
+          'ether'
+        ) /*ricordati di cambiare qui*/,
       })
     } catch (error) {
       console.log(error)
@@ -167,6 +196,23 @@ function ContractBtns({ setValue }) {
     }
   }
 
+  const wantToResellTicketHandler = async () => {
+    if (ticketNumberWantToResell === '') {
+      alert('Please enter all fields correctly')
+    }
+    if (!isPositiveInteger(ticketNumberWantToResell)) {
+      alert('Please insert a positive number')
+    }
+    try {
+      const numberOfTicketWantToResell = parseInt(ticketNumberWantToResell)
+      await contract.methods
+        .wantToResell(indexEventWantToResell, numberOfTicketWantToResell)
+        .send({ from: accounts[0], value: Web3.utils.toWei('0', 'ether') })
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <>
       {loading ? (
@@ -188,6 +234,29 @@ function ContractBtns({ setValue }) {
                 <p>I have {myTicketCount} ticket/s for the current event</p>
               )}
             </div>
+          </form>
+          <hr />
+          <form>
+            <h1>Want To Resell</h1>
+            <select
+              onChange={(e) => handleWantToResellEventSelect(e.target.value)}
+            >
+              <option value="">Select an event</option>
+              {events.map((event, index) => (
+                <option key={index} value={index}>
+                  {event.name}
+                </option>
+              ))}
+            </select>
+            <input
+              type="text"
+              placeholder="Insert number of tickets"
+              value={ticketNumberWantToResell}
+              onChange={(e) => {
+                setTicketNumberWantToResell(e.target.value)
+              }}
+            ></input>
+            <button onClick={wantToResellTicketHandler}>Want To Resell</button>
           </form>
           <hr />
           <form>
@@ -247,6 +316,12 @@ function ContractBtns({ setValue }) {
               }}
             ></input>
             <button onClick={refundTicketHandler}>Refund Tickets</button>
+          </form>
+          <hr />
+          <form>
+            <h1>Buy Ticket From Someone Else</h1>
+            <h3>Check if the address has tickets for event</h3>
+            <h3>Buy From Address</h3>
           </form>
           <hr />
         </div>

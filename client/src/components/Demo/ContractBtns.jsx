@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import useEth from '../../contexts/EthContext/useEth'
 import Web3 from 'web3'
 
@@ -23,27 +23,14 @@ function ContractBtns({ setValue }) {
   const [ticketNumberWantToResell, setTicketNumberWantToResell] = useState('')
   const [eventWantToResell, setEventWantToResell] = useState()
   const [indexEventWantToResell, setIndexEventWantToResell] = useState()
-  const [resellers, setResellers] = useState([])
+
+  const [tickerNumberResell, setTicketNumberResell] = useState('')
+  const [eventResell, setEventResell] = useState()
+  const [indexEventResell, setIndexEventResell] = useState()
+  const [addressResell, setAddressResell] = useState('')
 
   useEffect(() => {
     const fetchData = async () => {
-      console.log(resellers)
-      try {
-        const eventWantToResell = await contract.events
-          .WantToResell()
-          .on('data', (event) => {
-            console.log('Event to resell event recevide:')
-            const reseller = event.returnValues['reseller']
-            console.log(reseller)
-            setResellers((prevResellers) => [...prevResellers, reseller])
-            console.log(resellers)
-          })
-          .on('error', (error) => {
-            console.log('error:', error)
-          })
-      } catch (error) {
-        console.log(error)
-      }
       try {
         const totalEvents = await contract.methods
           .getTotalEvents()
@@ -85,9 +72,8 @@ function ContractBtns({ setValue }) {
         setLoading(false)
       }
     }
-
     fetchData()
-  }, [])
+  }, [accounts, contract.events, contract.methods])
 
   const isPositiveInteger = (value) => {
     const intValue = parseInt(value)
@@ -146,6 +132,11 @@ function ContractBtns({ setValue }) {
   const handleWantToResellEventSelect = (eventIndex) => {
     setEventWantToResell(events[eventIndex])
     setIndexEventWantToResell(eventIndex)
+  }
+
+  const handleResellEventSelect = (eventIndex) => {
+    setEventResell(events[eventIndex])
+    setIndexEventResell(eventIndex)
   }
 
   const handleEventMyTicket = (eventIndex) => {
@@ -207,6 +198,23 @@ function ContractBtns({ setValue }) {
       const numberOfTicketWantToResell = parseInt(ticketNumberWantToResell)
       await contract.methods
         .wantToResell(indexEventWantToResell, numberOfTicketWantToResell)
+        .send({ from: accounts[0], value: Web3.utils.toWei('0', 'ether') })
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const resellTicketHandler = async () => {
+    if (addressResell === '' || tickerNumberResell === '') {
+      alert('Please enter all fields correctly')
+    }
+    if (!isPositiveInteger(tickerNumberResell)) {
+      alert('Please insert a positive number')
+    }
+    try {
+      const numberOfTicketResell = parseInt(tickerNumberResell)
+      await contract.methods
+        .resellTickets(addressResell, indexEventResell, numberOfTicketResell)
         .send({ from: accounts[0], value: Web3.utils.toWei('0', 'ether') })
     } catch (error) {
       console.log(error)
@@ -320,8 +328,31 @@ function ContractBtns({ setValue }) {
           <hr />
           <form>
             <h1>Buy Ticket From Someone Else</h1>
-            <h3>Check if the address has tickets for event</h3>
-            <h3>Buy From Address</h3>
+            <input
+              type="text"
+              placeholder="Insert Address"
+              value={addressResell}
+              onChange={(e) => {
+                setAddressResell(e.target.value)
+              }}
+            ></input>
+            <select onChange={(e) => handleResellEventSelect(e.target.value)}>
+              <option value="">Select an event</option>
+              {events.map((event, index) => (
+                <option key={index} value={index}>
+                  {event.name}
+                </option>
+              ))}
+            </select>
+            <input
+              type="text"
+              placeholder="Insert number of tickets"
+              value={tickerNumberResell}
+              onChange={(e) => {
+                setTicketNumberResell(e.target.value)
+              }}
+            ></input>
+            <button onClick={resellTicketHandler}>Resell Tickets</button>
           </form>
           <hr />
         </div>

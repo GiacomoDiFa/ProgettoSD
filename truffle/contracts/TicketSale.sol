@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+// prova
 contract TicketSale {
     address public owner;
     //uint256 public totalTickets;

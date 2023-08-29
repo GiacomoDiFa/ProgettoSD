@@ -154,13 +154,16 @@ function ContractBtns({ setValue }) {
     }
     try {
       const numberOfTicket = parseInt(ticketNumber)
-      await contract.methods.buyTickets(indexEvent, numberOfTicket).send({
+      const priceOfTicket = parseInt(selectedEvent.ticketPrice)
+      console.log('TicketPRice: ', selectedEvent.ticketPrice)
+      const price = numberOfTicket * priceOfTicket
+      console.log('finale price:', price)
+      const priceString = price.toString()
+      console.log('finale price String:', priceString)
+      await contract.methods.buyTickets(indexEvent, priceString).send({
         from: accounts[0],
         gas: '5000000',
-        value: Web3.utils.toWei(
-          ticketNumber,
-          'ether'
-        ) /*ricordati di cambiare qui*/,
+        value: Web3.utils.toWei(priceString, 'ether'),
       })
     } catch (error) {
       console.log(error)
@@ -213,9 +216,20 @@ function ContractBtns({ setValue }) {
     }
     try {
       const numberOfTicketResell = parseInt(tickerNumberResell)
+      const priceOfTicketResell = parseInt(eventResell.ticketPrice)
+      console.log('numberOFTicketResell:', numberOfTicketResell)
+      console.log('TicketPRiceResell: ', eventResell.ticketPrice)
+      const priceResell = numberOfTicketResell * priceOfTicketResell
+      console.log('finale priceResell:', priceResell)
+      const priceResellString = priceResell.toString()
+      console.log('finale price String:', priceResellString)
       await contract.methods
         .resellTickets(addressResell, indexEventResell, numberOfTicketResell)
-        .send({ from: accounts[0], value: Web3.utils.toWei('0', 'ether') })
+        .send({
+          from: accounts[0],
+          value: Web3.utils.toWei(priceResellString, 'ether'),
+          gas: '5000000',
+        })
     } catch (error) {
       console.log(error)
     }
@@ -352,7 +366,7 @@ function ContractBtns({ setValue }) {
                 setTicketNumberResell(e.target.value)
               }}
             ></input>
-            <button onClick={resellTicketHandler}>Resell Tickets</button>
+            <button onClick={resellTicketHandler}>Buy Tickets</button>
           </form>
           <hr />
         </div>

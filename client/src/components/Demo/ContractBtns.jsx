@@ -160,7 +160,7 @@ function ContractBtns({ setValue }) {
       console.log('finale price:', price)
       const priceString = price.toString()
       console.log('finale price String:', priceString)
-      await contract.methods.buyTickets(indexEvent, priceString).send({
+      await contract.methods.buyTickets(indexEvent, numberOfTicket).send({
         from: accounts[0],
         gas: '5000000',
         value: Web3.utils.toWei(priceString, 'ether'),

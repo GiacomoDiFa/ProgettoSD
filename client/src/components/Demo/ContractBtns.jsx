@@ -31,6 +31,20 @@ function ContractBtns({ setValue }) {
 
   useEffect(() => {
     const fetchData = async () => {
+      const Web3 = require('web3')
+      const web3 = new Web3('http://localhost:7545')
+      const address = '0x80c9026c53B7EBdcF488f299b481889737179229'
+      web3.eth.getBalance(address, (err, balance) => {
+        if (err) {
+          console.error('Errore:', err)
+        } else {
+          console.log(
+            "Bilancio dell'indirizzo:",
+            web3.utils.fromWei(balance, 'ether'),
+            'ETH'
+          )
+        }
+      })
       try {
         const totalEvents = await contract.methods
           .getTotalEvents()
@@ -163,7 +177,7 @@ function ContractBtns({ setValue }) {
       await contract.methods.buyTickets(indexEvent, numberOfTicket).send({
         from: accounts[0],
         gas: '5000000',
-        value: Web3.utils.toWei(priceString, 'ether'),
+        value: priceString,
       })
     } catch (error) {
       console.log(error)
@@ -227,7 +241,7 @@ function ContractBtns({ setValue }) {
         .resellTickets(addressResell, indexEventResell, numberOfTicketResell)
         .send({
           from: accounts[0],
-          value: Web3.utils.toWei(priceResellString, 'ether'),
+          value: priceResellString,
           gas: '5000000',
         })
     } catch (error) {

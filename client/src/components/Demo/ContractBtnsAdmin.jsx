@@ -71,8 +71,10 @@ function ContractBtns({ setValue }) {
     }
     const numberOfTicket = parseInt(totalTicket)
     const priceOfTicket = parseInt(ticketPrice)
+    const priceOfTicketInWey = Web3.utils.toWei(ticketPrice, 'ether')
+    const priceOfTicketInWeyString = priceOfTicketInWey.toString()
     await contract.methods
-      .createEvent(name, description, numberOfTicket, priceOfTicket)
+      .createEvent(name, description, numberOfTicket, priceOfTicketInWeyString)
       .send({
         from: accounts[0],
       })
@@ -119,8 +121,9 @@ function ContractBtns({ setValue }) {
       const result = await contract.methods
         .getBalance()
         .call({ from: accounts[0], gas: '500000' })
+      const resultInEther = Web3.utils.fromWei(result, 'ether')
       console.log(result)
-      setBalance(result)
+      setBalance(resultInEther)
     } catch (error) {
       console.log('Errore durante la chiamata a getBalance:', error)
     }

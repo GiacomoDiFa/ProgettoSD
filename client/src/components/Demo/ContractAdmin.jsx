@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 
 function Contract({ value }) {
-  //const spanEle = useRef(null)
+  const spanEle = useRef(null)
 
   return (
     <code>

@@ -71,8 +71,7 @@ function ContractBtns({ setValue }) {
       alert('Please insert a positive number')
     }
     const numberOfTicket = parseInt(totalTicket)
-    const priceOfTicket = parseInt(ticketPrice)
-    const priceOfTicketInWey = Web3.utils.toWei(priceOfTicket, 'ether')
+    const priceOfTicketInWey = Web3.utils.toWei(ticketPrice, 'ether')
     const priceOfTicketInWeyString = priceOfTicketInWey.toString()
     await contract.methods
       .createEvent(name, description, numberOfTicket, priceOfTicketInWeyString)
@@ -102,9 +101,12 @@ function ContractBtns({ setValue }) {
     }
     const idEvent = parseInt(eventId)
     const numberOfTicketModified = parseInt(totalTicketModified)
-    const priceOfTicketModified = parseInt(ticketPriceModified)
-    const priceOfTicketModifiedInWey = Web3.utils.toWei(priceOfTicketModified, 'ether')
-    const priceOfTicketModifiedInWeyString = priceOfTicketModifiedInWey.toString()
+    const priceOfTicketModifiedInWey = Web3.utils.toWei(
+      ticketPriceModified,
+      'ether'
+    )
+    const priceOfTicketModifiedInWeyString =
+      priceOfTicketModifiedInWey.toString()
     await contract.methods
       .editEvent(
         idEvent,
@@ -184,7 +186,7 @@ function ContractBtns({ setValue }) {
           <hr />
           <form>
             <h1>Get Balance</h1>
-            <label>Balance:{balance}</label>
+            <label>Balance:{balance} ETH</label>
           </form>
           <button onClick={getBalanceHandler}>Get Balance</button>
           <form>

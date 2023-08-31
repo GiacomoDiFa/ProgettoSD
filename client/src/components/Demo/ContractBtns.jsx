@@ -310,7 +310,10 @@ function ContractBtns({ setValue }) {
               <p>Description: {selectedEvent.description}</p>
               <p>Total Tickets: {selectedEvent.totalTickets}</p>
               <p>Tickets Sold: {selectedEvent.ticketsSold}</p>
-              <p>Ticket Price: {selectedEvent.ticketPrice} Wei</p>
+              <p>
+                Ticket Price:{' '}
+                {Web3.utils.fromWei(selectedEvent.ticketPrice, 'ether')} ETH
+              </p>
               <p>Remaining Tickets: {remainingTicket}</p>
               {isSoldOut && (
                 <p style={{ color: 'red' }}>EVENT IS SOLD OUT!!!!</p>

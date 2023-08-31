@@ -47,6 +47,7 @@ function ContractBtns({ setValue }) {
     }
     fetchData()
   }, [])
+  //}, [accounts, contract.methods])
 
   const isPositiveInteger = (value) => {
     const intValue = parseInt(value)
@@ -71,7 +72,7 @@ function ContractBtns({ setValue }) {
     }
     const numberOfTicket = parseInt(totalTicket)
     const priceOfTicket = parseInt(ticketPrice)
-    const priceOfTicketInWey = Web3.utils.toWei(ticketPrice, 'ether')
+    const priceOfTicketInWey = Web3.utils.toWei(priceOfTicket, 'ether')
     const priceOfTicketInWeyString = priceOfTicketInWey.toString()
     await contract.methods
       .createEvent(name, description, numberOfTicket, priceOfTicketInWeyString)
@@ -102,13 +103,15 @@ function ContractBtns({ setValue }) {
     const idEvent = parseInt(eventId)
     const numberOfTicketModified = parseInt(totalTicketModified)
     const priceOfTicketModified = parseInt(ticketPriceModified)
+    const priceOfTicketModifiedInWey = Web3.utils.toWei(priceOfTicketModified, 'ether')
+    const priceOfTicketModifiedInWeyString = priceOfTicketModifiedInWey.toString()
     await contract.methods
       .editEvent(
         idEvent,
         nameModified,
         descriptionModified,
         numberOfTicketModified,
-        priceOfTicketModified
+        priceOfTicketModifiedInWeyString
       )
       .send({
         from: accounts[0],

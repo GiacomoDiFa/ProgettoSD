@@ -31,20 +31,6 @@ function ContractBtns({ setValue }) {
 
   useEffect(() => {
     const fetchData = async () => {
-      const Web3 = require('web3')
-      const web3 = new Web3('http://localhost:7545')
-      const address = '0x80c9026c53B7EBdcF488f299b481889737179229'
-      web3.eth.getBalance(address, (err, balance) => {
-        if (err) {
-          console.error('Errore:', err)
-        } else {
-          console.log(
-            "Bilancio dell'indirizzo:",
-            web3.utils.fromWei(balance, 'ether'),
-            'ETH'
-          )
-        }
-      })
       try {
         const totalEvents = await contract.methods
           .getTotalEvents()
@@ -324,7 +310,7 @@ function ContractBtns({ setValue }) {
               <p>Description: {selectedEvent.description}</p>
               <p>Total Tickets: {selectedEvent.totalTickets}</p>
               <p>Tickets Sold: {selectedEvent.ticketsSold}</p>
-              <p>Ticket Price: {selectedEvent.ticketPrice} ETH</p>
+              <p>Ticket Price: {selectedEvent.ticketPrice} Wei</p>
               <p>Remaining Tickets: {remainingTicket}</p>
               {isSoldOut && (
                 <p style={{ color: 'red' }}>EVENT IS SOLD OUT!!!!</p>

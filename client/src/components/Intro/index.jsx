@@ -1,5 +1,5 @@
-import Tree from './Tree'
-import Desc from './Desc'
+//import Tree from './Tree'
+//import Desc from './Desc'
 import Welcome from './Welcome'
 
 function Intro() {
